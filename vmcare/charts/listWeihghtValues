@@ -1,0 +1,58 @@
+var userModule = require("/ihealth/user");
+
+try {
+  
+  var from = request.parameters.from;
+  var to = request.parameters.to;
+  var fromDate = from ? new Date(from).getTime() : new Date("2016-10-01").getTime();
+  var toDate = to ? new Date(to).getTime() : new Date().getTime();
+  
+  var user = new userModule.User({username:"REPLACE_WITH_USERNAME"});
+  var values = user.listWeightMeasures({from:fromDate, to:toDate});
+  values = values.WeightDataList;
+  var data = {
+  "cols":[
+      {"id":"","label":"date","pattern":"","type":"string"},
+      {"id":"","label":"BMI","pattern":"","type":"number"},
+      {"id":"","label":"Fat","pattern":"","type":"number"},
+      {"id":"","label":"Muscale","pattern":"","type":"number"},
+      {"id":"","label":"Water","pattern":"","type":"number"},
+      {"id":"","label":"Weight","pattern":"","type":"number"}
+  ],
+  "rows":[]
+  };
+  
+  for (var i = 0; i < values.length; i++) {
+    
+    var bmi = parseFloat(values[i].BMI); 
+    bmi = Math.round(bmi * 100) / 100; 
+    bmi = bmi == 0 ? null : bmi;
+    var fat = parseFloat(values[i].FatValue); 
+    fat = Math.round(fat * 100) / 100;
+    fat = fat == 0 ? null : fat;
+    var muscale = parseFloat(values[i].MuscaleValue); 
+    muscale = Math.round(muscale * 100) / 100;
+    muscale = muscale == 0 ? null : muscale;
+    var water = parseFloat(values[i].WaterValue); 
+    water = Math.round(water * 100) / 100;
+    water = water  == 0 ? null : water;
+    var weight = parseFloat(values[i].WeightValue); 
+    weight = Math.round(weight * 100) / 100;
+    
+    var row = {"c":[
+      {"v": values[i].Date.substring(0, values[i].Date.indexOf("T"))}, 
+      {"v": bmi},
+      {"v": fat},
+      {"v": muscale},
+      {"v": water},
+      {"v": weight}
+    ]};
+    
+    data.rows.push(row);
+  };
+  
+  return data;
+  
+}catch(exception) {
+  return exception;
+}
